@@ -7,7 +7,8 @@ Find the perfect spot with the best window of annularity for the upcoming 2023 e
 2. Once downloaded, unzip the file.
 3. Move the unzipped files to the `data` directory in your project folder.
 
-After completing the above steps, you should be ready to run the project.
+After completing the above steps, you should be ready to run the project. Its important to note that the duration displayed on the map is **For Annularity Only** the eclipse will actually last much longer in a given area.
+
 
 ## Running the Code
 
