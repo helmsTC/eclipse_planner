@@ -9,5 +9,11 @@ Find the perfect spot with the best window of annularity for the upcoming 2023 e
 
 After completing the above steps, you should be ready to run the project.
 
+## Running the Code
+
+To track the eclipse based on a given location, use the script provided in the project. Here's the outline of the script:
+
+python eclipse_planner.py "Your Location"
+
 
 ![Map Image](eclipse_plan.png)
