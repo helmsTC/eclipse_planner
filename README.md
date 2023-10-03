@@ -13,7 +13,8 @@ After completing the above steps, you should be ready to run the project.
 
 To track the eclipse based on a given location, use the script provided in the project. Here's the outline of the script:
 
-python eclipse_planner.py "Your Location"
-
+```
+python eclipse_tracker.py "Your Location Name"
+```
 
 ![Map Image](eclipse_plan.png)
