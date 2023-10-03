@@ -7,12 +7,12 @@ Find the perfect spot with the best window of annularity for the upcoming 2023 e
 2. Once downloaded, unzip the file.
 3. Move the unzipped files to the `data` directory in your project folder.
 
-After completing the above steps, you should be ready to run the project. Its important to note that the duration displayed on the map is **For Annularity Only** the eclipse will actually last much longer in a given area.
+After completing the above steps, you should be ready to run the project. Its important to note that the duration displayed on the map is **For Annularity Only** the eclipse will actually last much longer in a given area. 
 
 
 ## Running the Code
 
-To track the eclipse based on a given location, use the script provided in the project. Here's the outline of the script:
+To track the eclipse based on a given location, use the script provided in the project. The `separation_degrees` variable will control how much of sun coverage for annularity, closer to 0 is full coverage (not possible with an annular eclipse, but close to 0) currently set to `0.01`.
 
 ```
 python eclipse_tracker.py "Your Location Name"
