@@ -13,7 +13,8 @@ from skyfield.searchlib import find_discrete
 from skyfield.searchlib import find_minima
 from folium import IFrame
 import base64
-
+from shapely.geometry import Point
+import gps
 def convert_utc_to_mdt(utc_time_str):
     utc_time = parse(utc_time_str).replace(tzinfo=timezone.utc)
     dst_start = datetime(2023, 3, 12, tzinfo=timezone.utc)
@@ -32,25 +33,57 @@ def embed_image_base64(img_filename):
         base64_img = base64.b64encode(image_file.read()).decode("utf-8")
     return f"data:image/png;base64,{base64_img}"
 
+from shapely.geometry import Point
+
 def generate_map(lat, lon, center_path, annular_path, duration):
+    # Convert string lat/lon values to float
+    lon_float = float(lon)
+    lat_float = float(lat)
+    point = Point(lon_float, lat_float)
+    
+    # Check if the point is inside Utah
+    us_states = gpd.read_file('maps/gz_2010_us_040_00_500k.json')
+    utah = us_states[us_states['NAME'] == 'Utah']
+    outside_utah = not utah.geometry.contains(point).any()
+
+    # Set the figure size based on the location
+    if outside_utah:
+        fig, ax = plt.subplots(figsize=(15, 15))
+    else:
+        fig, ax = plt.subplots(figsize=(10, 10))
+    
+    # Plot the US states and the Utah boundary
+    us_states.boundary.plot(ax=ax, linewidth=1, color="lightgrey")
+    utah.boundary.plot(ax=ax, linewidth=1.5, color="lightgrey")
+    
+    # Plotting the annular path and center line
     center_gdf = gpd.read_file(center_path)
     annular_gdf = gpd.read_file(annular_path)
-    m = folium.Map(location=[lat, lon], zoom_start=8)
-    folium.GeoJson(center_gdf.to_json(), name="Eclipse Center Line").add_to(m)
-    folium.GeoJson(annular_gdf.to_json(), name="Annular Path", style_function=lambda x: {'fillColor': '#ff0000', 'color': '#ff0000'}).add_to(m)
+    center_gdf.boundary.plot(ax=ax, color='blue', linewidth=1, label="Eclipse Center Line")
+    annular_gdf.plot(ax=ax, color='#ff0000', edgecolor='black', label="Annular Path")
     
-    # Embed the image as base64 into the HTML
-    base64_img = embed_image_base64("eclipse_representation.png")
-    html = f'<img src="{base64_img}" alt="eclipse representation" width="300" height="150">'
+    # Plot the location marker
+    ax.scatter(lon_float, lat_float, color='green', s=100, zorder=10)
+    ax.annotate(f"Your location will see {duration} of annularity",
+                xy=(lon_float, lat_float), xytext=(3,3), textcoords="offset points", zorder=10)
     
-    iframe = IFrame(html, width=320, height=170)
-    popup = folium.Popup(iframe, max_width=2650)
+    # Adjust the map's view based on the point's location
+    if outside_utah:
+        ax.set_xlim(-130, -65)
+        ax.set_ylim(24, 50)
+    else:
+        shift = -0.5
+        ax.set_xlim(utah.bounds.iloc[0]['minx']-1, utah.bounds.iloc[0]['maxx']+1)
+        ax.set_ylim(utah.bounds.iloc[0]['miny']-1 + shift, utah.bounds.iloc[0]['maxy']+1 + shift)
     
-    folium.Marker([lat, lon], tooltip=f"Your Location will see {duration} of annularity", popup=popup).add_to(m)
-    m.add_child(folium.LatLngPopup())
-    folium.LayerControl().add_to(m)
-    
-    return m
+    plt.legend()
+    plt.title("Eclipse Tracking Map")
+    plt.show()
+    return plt
+
+
+
+
 
 def separation_at_time(t, location_topos, sun, moon):
     astrometric_sun = location_topos.at(t).observe(sun).apparent()
@@ -78,13 +111,17 @@ def draw_eclipse(separation_degrees):
     ax.axis('off')  
     plt.savefig("eclipse_representation.png", bbox_inches='tight', pad_inches=0, transparent=True)
 
+def get_gps_data():
+    location = gps.GPS()
+    return location.get_location()
+    
 #lat, lon = 36.9983, -110.0985
-def eclipse_tracker(location):
-    #locatation example: "Monument Valley, AZ"
-    response = requests.get(f'https://nominatim.openstreetmap.org/search?q={location}&format=json')
-    data = response.json()
-    lat = data[0]['lat']
-    lon = data[0]['lon']
+def eclipse_tracker():
+    lat, lon = get_gps_data()
+    # 38.3668, -110.7140 caineville
+    # 38.2456, -111.2462 temple of the sun, capitol reef
+    # 38.406486, -110.792295 mars desert research lab
+    #lat, lon = 38.406486, -110.792295
     eph = load('de421.bsp')
     ts = load.timescale()
     earth, sun, moon = eph['earth'], eph['sun'], eph['moon']
@@ -125,22 +162,21 @@ def eclipse_tracker(location):
         print("Annularity will last a duration of: ", formatted_duration)  
         draw_eclipse(min_sep[0] if min_sep else 100)
         m = generate_map(lat, lon, center_path, annular_path, formatted_duration)
-        m.save("Eclipse_plan.html")  
+        plt.savefig("plan.png")
         return m
     else:
         print("No Annular Separation in This Area.")
         draw_eclipse(min_sep[0] if min_sep else 100)
         m = generate_map(lat, lon, center_path, annular_path, "0")
-        m.save("Eclipse_plan.html")  
+        plt.savefig("plan.png")
         return m
 
 def main():
     parser = argparse.ArgumentParser(description='Track eclipse based on location.')
-    parser.add_argument('location', type=str, help='Location for eclipse tracking (e.g. "Monument Valley, AZ").')
+    #parser.add_argument('location', type=str, help='Location for eclipse tracking (e.g. "Monument Valley, AZ").')
     args = parser.parse_args()
 
-    eclipse_tracker(args.location)
-    webbrowser.open("Eclipse_plan.html", new=2)
+    eclipse_tracker()
 
 if __name__ == "__main__":
     main()
