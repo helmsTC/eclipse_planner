@@ -36,38 +36,31 @@ def embed_image_base64(img_filename):
 from shapely.geometry import Point
 
 def generate_map(lat, lon, center_path, annular_path, duration):
-    # Convert string lat/lon values to float
     lon_float = float(lon)
     lat_float = float(lat)
     point = Point(lon_float, lat_float)
     
-    # Check if the point is inside Utah
     us_states = gpd.read_file('maps/gz_2010_us_040_00_500k.json')
     utah = us_states[us_states['NAME'] == 'Utah']
     outside_utah = not utah.geometry.contains(point).any()
 
-    # Set the figure size based on the location
     if outside_utah:
         fig, ax = plt.subplots(figsize=(15, 15))
     else:
         fig, ax = plt.subplots(figsize=(10, 10))
     
-    # Plot the US states and the Utah boundary
     us_states.boundary.plot(ax=ax, linewidth=1, color="lightgrey")
     utah.boundary.plot(ax=ax, linewidth=1.5, color="lightgrey")
     
-    # Plotting the annular path and center line
     center_gdf = gpd.read_file(center_path)
     annular_gdf = gpd.read_file(annular_path)
     center_gdf.boundary.plot(ax=ax, color='blue', linewidth=1, label="Eclipse Center Line")
     annular_gdf.plot(ax=ax, color='#ff0000', edgecolor='black', label="Annular Path")
     
-    # Plot the location marker
     ax.scatter(lon_float, lat_float, color='green', s=100, zorder=10)
     ax.annotate(f"Your location will see {duration} of annularity",
                 xy=(lon_float, lat_float), xytext=(3,3), textcoords="offset points", zorder=10)
     
-    # Adjust the map's view based on the point's location
     if outside_utah:
         ax.set_xlim(-130, -65)
         ax.set_ylim(24, 50)
@@ -78,7 +71,6 @@ def generate_map(lat, lon, center_path, annular_path, duration):
     
     plt.legend()
     plt.title("Eclipse Tracking Map")
-    plt.show()
     return plt
 
 
@@ -162,13 +154,15 @@ def eclipse_tracker():
         print("Annularity will last a duration of: ", formatted_duration)  
         draw_eclipse(min_sep[0] if min_sep else 100)
         m = generate_map(lat, lon, center_path, annular_path, formatted_duration)
-        plt.savefig("plan.png")
+        m.savefig("plan.png")
+        m.show()
         return m
     else:
         print("No Annular Separation in This Area.")
         draw_eclipse(min_sep[0] if min_sep else 100)
         m = generate_map(lat, lon, center_path, annular_path, "0")
-        plt.savefig("plan.png")
+        m.savefig("plan.png")
+        m.show()
         return m
 
 def main():
