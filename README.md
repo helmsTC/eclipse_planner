@@ -1,6 +1,9 @@
 # eclipse_planner
 Find the perfect spot with the best window of annularity for the upcoming 2023 eclipse 
 
+*Modified to work with an Adafruit Ultimate GPS module for offline raspberry pi use*
+`https://www.adafruit.com/product/746`
+
 ## Download and Setup Instructions
 
 1. Click on the following link to download the required file: [Download 2023eclipse_shapefiles.zip](https://svs.gsfc.nasa.gov/vis/a000000/a005000/a005073/2023eclipse_shapefiles.zip)
