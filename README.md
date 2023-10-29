@@ -18,4 +18,13 @@ To track the eclipse based on a given location, use the script provided in the p
 python eclipse_tracker.py "Your Location Name"
 ```
 
-![Map Image](eclipse_plan.png)
+![Plan](results/plan.png)
+
+<div style="display: flex; justify-content: space-between;">
+    <div style="flex-basis: 48%;">
+        <p align="center"><img src="results/predicted_eclipse.png" alt="Map Image" /><br />Predited Eclipse</p>
+    </div>
+    <div style="flex-basis: 55%;">
+        <p align="center"><img src="results/eclipse.jpg" alt="Offline Map Image" /><br />Actual Eclipse</p>
+    </div>
+</div>

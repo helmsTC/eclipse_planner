@@ -161,7 +161,7 @@ def eclipse_tracker():
         print("No Annular Separation in This Area.")
         draw_eclipse(min_sep[0] if min_sep else 100)
         m = generate_map(lat, lon, center_path, annular_path, "0")
-        m.savefig("plan.png")
+        m.savefig("results/plan.png")
         m.show()
         return m
 
